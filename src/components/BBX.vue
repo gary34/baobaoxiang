@@ -26,9 +26,9 @@
 
 .baobei-card {
   margin-top: 10px;
-  margin-left: 40px;
+  margin-left: 30px;
   float: left;
-  width: 402px;
+  width: 410px;
 }
 
 
@@ -158,7 +158,7 @@ div.item-info div {
     </el-card>
 	<div class='content-warpper'>
 
-		<el-card class="baobei-card" v-for="project in projects" :key="project.id" :body-style="{ padding: '0px' }" >
+		<el-card class="baobei-card" v-for="project in filterProject" :key="project.id" :body-style="{ padding: '0px' }" >
 			<div class="baobei-card-header">
 				<span class='header-title'>{{project.name}}</span>
 			</div>
@@ -239,6 +239,21 @@ export default {
     itemApi.favoies(userid).then(result => {
       this.favoies = result.data
     })
+  },
+  computed: {
+    filterProject () {
+      console.log(this.searchText)
+      if (this.searchText === '') {
+        return this.projects
+      }
+      let ps = JSON.parse(JSON.stringify(this.projects))
+      let st = this.searchText
+      let rg = new RegExp(st, 'i')
+      ps.forEach(function (p, index, array) {
+        ps[index].items = p.items.filter(item => rg.test(item.name))
+      })
+      return ps
+    }
   },
   methods: {
     handleIconClick (ev) {

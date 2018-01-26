@@ -1,11 +1,18 @@
 import api from './index'
 
-function list (userid) {
+function list (uid) {
   return api.get('items.json', {
     params: {
-      userid: userid
+      uid: uid
     }
   })
 }
 
-export default {list}
+function favoies (uid) {
+  return api.get('favoies.json', {
+    params: {
+      uid: uid
+    }
+  })
+}
+export default {list, favoies}

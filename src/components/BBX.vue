@@ -113,7 +113,7 @@ div.item-info div {
             </div> 
             <el-collapse-transition>
                 <div v-show="showFavorie" class="favorie-panel-body">
-                    <span  class="baobei-item" v-for="item in favorites" :key="item.id">
+                    <span  class="baobei-item" v-for="item in favoies" :key="item.id">
                         <el-popover
                           placement="top-start"
                           trigger="hover"
@@ -219,8 +219,8 @@ export default {
   data () {
     return {
       showFavorie: true,
-      favorites: [],
-      // favoritesSet: new Set(),
+      favoies: [],
+      // favoiesSet: new Set(),
       searchText: '',
       projects: []
     }
@@ -236,6 +236,9 @@ export default {
     itemApi.list(userid).then(result => {
       this.projects = result.data
     })
+    itemApi.favoies(userid).then(result => {
+      this.favoies = result.data
+    })
   },
   methods: {
     handleIconClick (ev) {
@@ -246,13 +249,13 @@ export default {
     },
     setFavorite (item) {
       if (item.favorited) {
-        let i = this.favorites.indexOf(item)
+        let i = this.favoies.indexOf(item)
         if (i >= 0) {
-          this.favorites.splice(i, 1)
+          this.favoies.splice(i, 1)
         }
         item.favorited = false
       } else {
-        this.favorites.push(item)
+        this.favoies.push(item)
         item.favorited = true
       }
     }

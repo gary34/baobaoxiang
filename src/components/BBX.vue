@@ -123,7 +123,7 @@ div.item-info div {
                               <span>
                                 {{item.name}}
                               </span>
-                              <i v-bind:class="item.favorited ? 'el-icon-star-on' : 'el-icon-star-off'" v-on:click="setFavorite(item)" style="cursor: pointer;"></i>
+                              <i v-bind:class="item.in_favor ? 'el-icon-star-on' : 'el-icon-star-off'" v-on:click="setFavorite(item)" style="cursor: pointer;"></i>
                           </div>
                           <hr/>
                           <div clsss='baobei-desc'v-if="item.desc.length > 0">
@@ -177,7 +177,7 @@ div.item-info div {
 					  <span>
 					  	{{item.name}}
 					  </span>
-					  <i v-bind:class="item.favorited ? 'el-icon-star-on' : 'el-icon-star-off'" v-on:click="setFavorite(item)" style="cursor: pointer;"></i>
+					  <i v-bind:class="item.in_favor ? 'el-icon-star-on' : 'el-icon-star-off'" v-on:click="setFavorite(item)" style="cursor: pointer;"></i>
 				  </div>
 				  <hr/>
 				  <div clsss='baobei-desc'v-if="item.desc.length > 0">
@@ -218,6 +218,7 @@ export default {
   name: 'BBX',
   data () {
     return {
+      uid: 0,
       showFavorie: true,
       favoies: [],
       // favoiesSet: new Set(),
@@ -226,17 +227,18 @@ export default {
     }
   },
   created () {
-    let userid
-    if (localStorage.userid === undefined) {
-      userid = Math.floor(Math.random() * 1000 * 1000) + 1
-      localStorage.userid = userid
+    let uid
+    if (localStorage.uid === undefined) {
+      uid = Math.floor(Math.random() * 1000 * 1000) + 1
+      localStorage.uid = uid
     } else {
-      userid = localStorage.userid
+      uid = localStorage.uid
     }
-    itemApi.list(userid).then(result => {
+    this.uid = uid
+    itemApi.list(uid).then(result => {
       this.projects = result.data
     })
-    itemApi.favoies(userid).then(result => {
+    itemApi.favoies(uid).then(result => {
       this.favoies = result.data
     })
   },
@@ -263,15 +265,21 @@ export default {
       this.showFavorie = !this.showFavorie
     },
     setFavorite (item) {
-      if (item.favorited) {
-        let i = this.favoies.indexOf(item)
+      if (item.in_favor) {
+        let i = this.favoies.findIndex((i) => {
+          return i.ID === item.ID
+        })
         if (i >= 0) {
-          this.favoies.splice(i, 1)
+          itemApi.rmFavory(this.uid, item.id).then(() => {
+            this.favoies.splice(i, 1)
+            item.in_favor = false
+          })
         }
-        item.favorited = false
       } else {
-        this.favoies.push(item)
-        item.favorited = true
+        itemApi.addFavory(this.uid, item.id).then(() => {
+          this.favoies.push(item)
+          item.in_favor = true
+        })
       }
     }
   }

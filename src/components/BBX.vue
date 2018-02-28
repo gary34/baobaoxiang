@@ -227,20 +227,20 @@ export default {
     }
   },
   created () {
-    let uid
-    if (localStorage.uid === undefined) {
-      uid = Math.floor(Math.random() * 1000 * 1000) + 1
-      localStorage.uid = uid
+    // 没有token，没有登录拿到token
+    if (localStorage.token !== undefined) {
+      itemApi.favoies().then(result => {
+        this.favoies = result
+      })
     } else {
-      uid = localStorage.uid
+      if (localStorage.favoies !== undefined) {
+        this.favoies = JSON.parse(localStorage.favoies)
+      }
     }
-    this.uid = uid
-    itemApi.list(uid).then(result => {
-      this.projects = result.data
-    })
-    itemApi.favoies(uid).then(result => {
-      this.favoies = result.data
-    })
+    itemApi.list().then(result => {
+      // console.log(result)
+      this.projects = result
+    }).catch(() => {})
   },
   computed: {
     filterProject () {
@@ -270,17 +270,22 @@ export default {
           return i.ID === item.ID
         })
         if (i >= 0) {
-          itemApi.rmFavory(this.uid, item.id).then(() => {
-            this.favoies.splice(i, 1)
-            item.in_favor = false
-          })
+          this.favoies.splice(i, 1)
+          item.in_favor = false
+          if (localStorage.token !== undefined) {
+            itemApi.rmFavory(item.id).catch(() => {
+              console.log('something worrng')
+            })
+          }
         }
       } else {
-        itemApi.addFavory(this.uid, item.id).then(() => {
-          this.favoies.push(item)
-          item.in_favor = true
-        })
+        this.favoies.push(item)
+        item.in_favor = true
+        if (localStorage.token !== undefined) {
+          itemApi.addFavory(item.id).catch(() => {})
+        }
       }
+      localStorage.favoies = JSON.stringify(this.favoies)
     }
   }
 }
